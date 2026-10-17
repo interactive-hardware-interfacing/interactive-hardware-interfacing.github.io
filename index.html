@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive Hardware Interfacing</title>
+<meta name="description" content="Browser-based instruments and lab tools that talk to real hardware over USB. Nothing to install.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Spline+Sans+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper:  #f3f6f2;
+    --panel:  #ffffff;
+    --ink:    #1b2620;
+    --ink-2:  #4c5b53;
+    --ink-3:  #86928b;
+    --sage:   #7d9385;
+    --sage-2: #c6d2c9;
+    --sage-3: #e3eae4;
+    --moss:   #2f4a39;
+    --moss-2: #22382a;
+    --ready:  #3a8a3f;
+    --soon:   #b8700a;
+    --font:   'Atkinson Hyperlegible', system-ui, sans-serif;
+    --mono:   'Spline Sans Mono', ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #141a16; --panel: #1d2520; --ink: #e8ece9; --ink-2: #aeb8b1; --ink-3: #74807a;
+      --sage: #8aa392; --sage-2: #374740; --sage-3: #26312b; --moss: #9fcbab; --moss-2: #b7dac1;
+      --ready: #5db563; --soon: #e9a63a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #141a16; --panel: #1d2520; --ink: #e8ece9; --ink-2: #aeb8b1; --ink-3: #74807a;
+    --sage: #8aa392; --sage-2: #374740; --sage-3: #26312b; --moss: #9fcbab; --moss-2: #b7dac1;
+    --ready: #5db563; --soon: #e9a63a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--font); font-size: 17px; line-height: 1.55; padding: 0 16px 56px; }
+  a { color: var(--moss); }
+  :focus-visible { outline: 2px solid var(--moss); outline-offset: 2px; }
+  .wrap { max-width: 1040px; margin: 0 auto; }
+
+  /* hero: a live serial exchange, because that's the whole idea of the org */
+  header { padding: 56px 0 28px; display: grid; grid-template-columns: 1.1fr .9fr; gap: 40px; align-items: center; }
+  @media (max-width: 760px) { header { grid-template-columns: 1fr; padding-top: 36px; } }
+  h1 { font-size: clamp(2rem, 4.5vw, 2.9rem); line-height: 1.1; margin: 0 0 14px; letter-spacing: -.015em; }
+  .lede { font-size: 1.15rem; color: var(--ink-2); margin: 0 0 18px; max-width: 34em; }
+  .lede + p { margin: 0; color: var(--ink-2); }
+  .term {
+    background: var(--ink); color: var(--paper); border-radius: 8px; padding: 18px 20px;
+    font-family: var(--mono); font-size: .9rem; line-height: 1.6; white-space: pre; overflow-x: auto;
+    box-shadow: 0 12px 30px -18px rgba(0,0,0,.5);
+  }
+  .term .tx { color: #9fcbab; }
+  .term .c { color: #86928b; }
+  .term .cur { display: inline-block; width: .6em; height: 1.05em; background: var(--paper); vertical-align: -2px; animation: blink 1.1s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0; } }
+  @media (prefers-reduced-motion: reduce) { .term .cur { animation: none; } }
+
+  section { margin-top: 40px; }
+  h2 { font-size: 1.3rem; margin: 0 0 14px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 18px; }
+  .tool {
+    background: var(--panel); border: 1px solid var(--sage-2); border-radius: 8px; padding: 20px 22px 18px;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .tool h3 { margin: 0; font-size: 1.15rem; }
+  .tool h3 a { color: var(--ink); text-decoration: none; }
+  .tool h3 a:hover { color: var(--moss); text-decoration: underline; }
+  .tool p { margin: 0; color: var(--ink-2); font-size: .98rem; flex: 1; }
+  .meta { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: .88rem; color: var(--ink-3); align-items: center; }
+  .state { display: inline-flex; align-items: center; gap: 6px; }
+  .state::before { content: ''; width: 8px; height: 8px; border-radius: 50%; background: var(--ink-3); }
+  .state.ready::before { background: var(--ready); }
+  .state.soon::before  { background: var(--soon); }
+  .links { display: flex; gap: 8px; margin-top: 6px; }
+  .btn { border: 1px solid var(--sage); background: var(--panel); color: var(--ink); border-radius: 6px; padding: 6px 13px; font: inherit; font-size: .92rem; text-decoration: none; }
+  .btn.primary { background: var(--moss); border-color: var(--moss); color: var(--paper); font-weight: 700; }
+  .btn:hover { border-color: var(--moss); }
+  .btn.primary:hover { background: var(--moss-2); border-color: var(--moss-2); }
+
+  .how { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; }
+  .how div { background: var(--sage-3); border-radius: 8px; padding: 16px 18px; }
+  .how b { display: block; margin-bottom: 4px; }
+  .how p { margin: 0; color: var(--ink-2); font-size: .95rem; }
+  code { font-family: var(--mono); font-size: .9em; background: var(--sage-3); padding: 1px 5px; border-radius: 3px; }
+  footer { margin-top: 48px; padding-top: 18px; border-top: 1px solid var(--sage-2); color: var(--ink-3); font-size: .9rem; display: flex; flex-wrap: wrap; gap: 8px 24px; }
+  footer a { color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div>
+    <h1>Instruments that run in the browser and talk to real hardware.</h1>
+    <p class="lede">Open a page, plug in a board, click Connect. Each tool here drives a device over USB using the browser's own serial and USB APIs, so there is nothing to install and it doesn't matter what computer you're on.</p>
+    <p>Works in Chrome and Edge. Every tool also has a demo mode that needs no hardware.</p>
+  </div>
+  <pre class="term" aria-label="Example of a browser talking to a board over serial"><span class="tx">&gt; ID</span>
+ID LEDLAB 1.0.0 arduino ItsyBitsyM4
+<span class="tx">&gt; LED G</span>
+OK LED G
+<span class="tx">&gt; SET 2.4</span>
+OK SET 2.400
+<span class="tx">&gt; MEAS</span>
+M 2.051 0.011230 1.123 2.400 G
+<span class="c"># ^ volts, amps, sense V, drive V, LED</span>
+<span class="tx">&gt; </span><span class="cur"></span></pre>
+</header>
+
+<section>
+  <h2>Tools</h2>
+  <div class="grid" id="tools"></div>
+</section>
+
+<section>
+  <h2>How these work</h2>
+  <div class="how">
+    <div><b>One page per instrument</b><p>Each tool is a single HTML file in its own repository, served by GitHub Pages. No build step, no framework. View source and you have the whole thing.</p></div>
+    <div><b>Plain-text protocols</b><p>Boards speak short line-based commands (<code>SET 2.4</code>, <code>MEAS</code>). The same commands work from a serial terminal or a Python script, so a tool's page is never the only way in.</p></div>
+    <div><b>Browser APIs, not drivers</b><p>Web Serial for USB-serial boards and instruments; WebUSB where a device needs it. Both are built into Chrome and Edge and ask for permission before touching a port.</p></div>
+  </div>
+</section>
+
+<footer>
+  <span><a href="https://github.com/interactive-hardware-interfacing">github.com/interactive-hardware-interfacing</a></span>
+  <span>Maintained by <a href="https://lc-linkous.github.io/">LC Linkous</a></span>
+</footer>
+</div>
+
+<script>
+// Add a tool: one entry here. `state` is "ready", "soon", or "planned".
+const TOOLS = [
+  {
+    name: 'LED I–V Lab',
+    repo: 'led-iv-lab',
+    blurb: 'Select one of four LEDs, sweep the drive voltage, and plot forward voltage against current live. Built for a university electronics lab on the Adafruit ItsyBitsy M4.',
+    hardware: 'ItsyBitsy M4 + lab board',
+    api: 'Web Serial',
+    state: 'ready',
+  },
+  {
+    name: 'nanoVNA Web',
+    repo: 'nanovna-web',
+    blurb: 'Sweep, S-parameter traces, Smith chart, and CSV export from a nanoVNA, using the same command set as the nvnapython library.',
+    hardware: 'nanoVNA (any USB-serial model)',
+    api: 'Web Serial',
+    state: 'soon',
+  },
+  {
+    name: 'tinySA Web',
+    repo: 'tinysa-web',
+    blurb: 'Live spectrum and waterfall from a tinySA spectrum analyzer.',
+    hardware: 'tinySA / tinySA Ultra',
+    api: 'Web Serial',
+    state: 'planned',
+  },
+  {
+    name: 'Array Calculator',
+    repo: 'array-calculator',
+    blurb: 'Linear antenna array synthesis and pattern plots — uniform, binomial, Dolph-Tschebyscheff, Taylor, Kaiser and more — with sliders. No hardware needed.',
+    hardware: 'None',
+    api: 'Pure JS',
+    state: 'planned',
+  },
+];
+
+const ORG = 'https://github.com/interactive-hardware-interfacing/';
+const SITE = 'https://interactive-hardware-interfacing.github.io/';
+const STATE_LABEL = { ready: 'Ready to use', soon: 'In progress', planned: 'Planned' };
+const grid = document.getElementById('tools');
+for (const t of TOOLS) {
+  const el = document.createElement('article');
+  el.className = 'tool';
+  const live = t.state === 'ready';
+  el.innerHTML = `
+    <h3>${live ? `<a href="${SITE}${t.repo}/">${t.name}</a>` : t.name}</h3>
+    <p>${t.blurb}</p>
+    <div class="meta"><span class="state ${t.state}">${STATE_LABEL[t.state]}</span><span>${t.hardware}</span><span>${t.api}</span></div>
+    <div class="links">
+      ${live ? `<a class="btn primary" href="${SITE}${t.repo}/">Open tool</a>` : ''}
+      ${t.state !== 'planned' ? `<a class="btn" href="${ORG}${t.repo}">Source</a>` : ''}
+    </div>`;
+  grid.appendChild(el);
+}
+</script>
+</body>
+</html>
