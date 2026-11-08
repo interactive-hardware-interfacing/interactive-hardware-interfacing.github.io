@@ -24,11 +24,13 @@
     --magenta: #f472b6;
     --green: #4ade80;
     --yellow: #facc15;
+    --violet: #a78bfa;
 
     --cyan-dim: rgba(34, 211, 238, .12);
     --magenta-dim: rgba(244, 114, 182, .12);
     --green-dim: rgba(74, 222, 128, .12);
     --yellow-dim: rgba(250, 204, 21, .12);
+    --violet-dim: rgba(167, 139, 250, .12);
 
     --sans: "Atkinson Hyperlegible", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
     --mono: "Spline Sans Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -164,6 +166,7 @@
   .k.magenta { color: var(--magenta); background: var(--magenta-dim); }
   .k.green { color: var(--green); background: var(--green-dim); }
   .k.yellow { color: var(--yellow); background: var(--yellow-dim); }
+  .k.violet { color: var(--violet); background: var(--violet-dim); }
 
   /* ---------- sections ---------- */
   section { padding: 0 0 72px; }
@@ -173,6 +176,7 @@
   .sec-head p { margin: 0; color: var(--muted); max-width: 46em; }
   .track-cyan h2 .swatch { background: var(--cyan); }
   .track-yellow h2 .swatch { background: var(--yellow); }
+  .track-violet h2 .swatch { background: var(--violet); }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
   .card {
@@ -183,6 +187,7 @@
   .card:hover { background: var(--card-hover); transform: translateY(-2px); }
   .track-cyan .card:hover { border-color: var(--cyan); }
   .track-yellow .card:hover { border-color: var(--yellow); }
+  .track-violet .card:hover { border-color: var(--violet); }
   .card .num-tag {
     position: absolute; top: 14px; right: 16px; font-family: var(--mono); font-size: 12px; color: var(--faint);
   }
@@ -197,9 +202,11 @@
   .chip.demo { color: var(--green); border-color: transparent; background: var(--green-dim); }
   .track-cyan .chip.hw { color: var(--cyan); border-color: transparent; background: var(--cyan-dim); }
   .track-yellow .chip.hw { color: var(--yellow); border-color: transparent; background: var(--yellow-dim); }
+  .track-violet .chip.hw { color: var(--violet); border-color: transparent; background: var(--violet-dim); }
   .card .actions { display: flex; gap: 8px; margin-top: 4px; }
   .track-cyan .btn.open { background: var(--cyan); color: #04141a; border-color: var(--cyan); }
   .track-yellow .btn.open { background: var(--yellow); color: #1a1500; border-color: var(--yellow); }
+  .track-violet .btn.open { background: var(--violet); color: #14102a; border-color: var(--violet); }
   .card.wide { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 24px; }
   .card.wide .actions { margin: 0; }
   .card.wide .body { display: flex; flex-direction: column; gap: 12px; }
@@ -252,6 +259,7 @@
     <nav>
       <a href="#wireless">Wireless</a>
       <a href="#lab">Electronics lab</a>
+      <a href="#sim">Simulations</a>
       <a href="#how">How it works</a>
       <a href="https://github.com/interactive-hardware-interfacing">GitHub</a>
     </nav>
@@ -261,7 +269,7 @@
     <div>
       <div class="eyebrow">Educational demos &amp; lab tools</div>
       <h1>Instruments that run in the <em>browser</em> and talk to real hardware.</h1>
-      <p class="lede">Open a page, plug in a board, click <strong>Connect</strong>. Nothing to install, any operating system. Every tool has a <strong>demo mode</strong> that runs with no hardware at all.</p>
+      <p class="lede">Open a page, plug in a board, click <strong>Connect</strong>. Nothing to install, any operating system. Every tool has a <strong>demo mode</strong> that runs with no hardware at all, and some need no hardware ever.</p>
       <div class="cta">
         <a class="btn primary" href="#wireless">Browse the tools</a>
         <a class="btn" href="https://github.com/interactive-hardware-interfacing">Source on GitHub</a>
@@ -312,6 +320,14 @@
     <div class="grid" id="lab-grid"></div>
   </section>
 
+  <section id="sim" class="track-violet">
+    <div class="sec-head">
+      <h2><span class="swatch"></span>Simulations</h2>
+      <p>No board required. Interactive physics that runs entirely in the page, for the concepts you can't put on a bench.</p>
+    </div>
+    <div class="grid" id="sim-grid"></div>
+  </section>
+
   <section id="how">
     <div class="sec-head">
       <h2>How these work</h2>
@@ -335,7 +351,7 @@
       <div class="panel">
         <div class="n">04 / firmware included</div>
         <h3>Everything to rebuild it</h3>
-        <p>Each repo ships the microcontroller code (mostly CircuitPython) plus wiring diagrams in <code>wiring/</code>.</p>
+        <p>Every hardware repo ships the microcontroller code (mostly CircuitPython) plus wiring diagrams in <code>wiring/</code>.</p>
       </div>
     </div>
   </section>
@@ -381,11 +397,17 @@
       hw: "ItsyBitsy M4 + lab LED board" },
   ];
 
+  const sim = [
+    { slug: "intro-emf-lab", name: "Intro EMF Lab",
+      teaches: "<b>Fields you can poke.</b> Fourteen simulators for an intro electromagnetism course: Coulomb superposition, Gauss's law, dielectrics, capacitance, transmission lines, Biot–Savart, inductors and 2-D FDTD. Every number is reproducible from the page URL.",
+      hw: "No hardware", nodemo: true },
+  ];
+
   function card(t, i, wide) {
     const inner = `
       <h3>${t.name}</h3>
       <p class="teaches">${t.teaches}</p>
-      <div class="chips"><span class="chip hw">${t.hw}</span><span class="chip demo">demo mode</span></div>`;
+      <div class="chips"><span class="chip hw">${t.hw}</span>${t.nodemo ? "" : '<span class="chip demo">demo mode</span>'}</div>`;
     const actions = `
       <div class="actions">
         <a class="btn sm open" href="${PAGES}${t.slug}/">Open ▶</a>
@@ -398,6 +420,7 @@
 
   document.getElementById("wireless-grid").innerHTML = wireless.map((t, i) => card(t, i)).join("");
   document.getElementById("lab-grid").innerHTML = lab.map((t, i) => card(t, i, true)).join("");
+  document.getElementById("sim-grid").innerHTML = sim.map((t, i) => card(t, i, true)).join("");
 
   /* ---- cycling terminal ---- */
   const sessions = [
